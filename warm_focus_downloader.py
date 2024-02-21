@@ -5,6 +5,7 @@ import base64
 import datetime
 import eyed3
 import os
+import traceback
 
 
 # Function to download image
@@ -58,10 +59,19 @@ for page in range(1, 11):
             # Construct filename for the MP3 file
             mp3_filename = f'Warm Focus - {air_date} - {show_title}.mp3'
 
-            # Download mp3 file'
-            mp3_data = requests.get(mp3_url).content
-            with open(f'mp3/{mp3_filename}', 'wb') as mp3_file:
-                mp3_file.write(mp3_data)
+            print(f'Title: {show_title}')
+            print(f'mp3_url: {mp3_url}')
+            print(f'Album art: {album_art_url}')
+
+
+            if not os.path.exists(f'mp3/{mp3_filename}'):
+                # Download mp3 file
+                mp3_data = requests.get(mp3_url).content
+                with open(f'mp3/{mp3_filename}', 'wb') as mp3_file:
+                    mp3_file.write(mp3_data)
+            else:
+                print(f"File {mp3_filename} already exists, skipping download.")
+                continue
 
             # Extract the extension of the album art image file (excluding parameters)
             base_url = album_art_url.split('?')[0]
@@ -84,6 +94,10 @@ for page in range(1, 11):
 
             # Set the show title as the title of the mp3
             mp3_file.tag.title = show_title
+            # Set the MP3 artist
+            mp3_file.tag.artist = "Hoverbird"
+            # Set the album
+            mp3_file.tag.album = "Warm Focus"
 
             # Add album art to MP3
             with open(f'art/{art_filename}', 'rb') as img_file:
@@ -95,3 +109,4 @@ for page in range(1, 11):
         except Exception as e:
             print(f'Error processing show {i+1}/{len(show_elems)}. MP3 file: mp3/{mp3_filename}')
             print(f'Detail: {e}')
+            traceback.print_exc()
